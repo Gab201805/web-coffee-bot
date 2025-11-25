@@ -4,6 +4,14 @@ import Link from "next/link";
 import Image from "next/image";
 
 export default function HomePage() {
+  const heroText = `👋 Welcome to **Vital Coffee Roasters** — where strength meets coffee.\n\nWe roast specialty coffees crafted for **energy, focus, and recovery.**\nPerfect for athletes, creators, and anyone who fuels their day naturally. 💪☕`;
+
+  const renderHero = (raw: string) => {
+    let escaped = raw.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    escaped = escaped.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    escaped = escaped.replace(/\n{2,}/g, '<br/><br/>' ).replace(/\n/g, '<br/>' );
+    return { __html: escaped };
+  };
   return (
     <div className="min-h-screen flex flex-col bg-white relative">
       {/* Blank top area with only login button */}
@@ -14,7 +22,7 @@ export default function HomePage() {
       </div>
       <main className="flex-1 flex flex-col items-center justify-start px-4">
         {/* Centered logo block */}
-        <div className="mt-24 mb-12 flex flex-col items-center gap-8">
+        <div className="mt-16 mb-8 flex flex-col items-center gap-8">
           <Image
             src="/file.svg"
             alt="Virtual Coffee Logo"
@@ -24,15 +32,19 @@ export default function HomePage() {
             sizes="(max-width: 640px) 192px, (max-width: 768px) 256px, (max-width: 1024px) 288px, (max-width: 1280px) 384px, (max-width: 1536px) 480px, 480px"
             priority
           />
-          <div className="flex flex-col items-center text-center max-w-2xl">
-            <p className="font-semibold tracking-tight text-3xl md:text-4xl">Hey there ☕</p>
-            <p className="font-semibold tracking-tight text-3xl md:text-4xl mt-2">Need great roasted beans or quick coffee tips? Just ask.</p>
+          <div className="flex flex-col items-center w-full">
+            <div className="w-full max-w-3xl px-4 text-center">
+              <p
+                className="text-lg md:text-xl leading-relaxed text-neutral-900"
+                dangerouslySetInnerHTML={renderHero(heroText)}
+              />
+            </div>
           </div>
         </div>
         <div className="w-full max-w-3xl">
           <Chat />
         </div>
-        <div className="h-24" />
+        <div className="h-12" />
       </main>
     </div>
   );
