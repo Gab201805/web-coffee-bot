@@ -6,9 +6,10 @@ import "leaflet/dist/leaflet.css";
 
 interface RoastsMapProps {
   onAddToCart?: (regionName: string) => void;
+  full?: boolean;
 }
 
-export default function RoastsMap({ onAddToCart }: RoastsMapProps) {
+export default function RoastsMap({ onAddToCart, full }: RoastsMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<L.Map | null>(null);
 
@@ -59,7 +60,7 @@ export default function RoastsMap({ onAddToCart }: RoastsMapProps) {
     const map = L.map(mapRef.current, {
       center: [6.2, 38.6],
       zoom: 7,
-      scrollWheelZoom: false,
+      scrollWheelZoom: true,
     });
     mapInstance.current = map;
 
@@ -80,6 +81,11 @@ export default function RoastsMap({ onAddToCart }: RoastsMapProps) {
       onEachFeature: (feature: any, layer: L.Layer) => {
         const polygon = layer as L.Path;
         const name = feature.properties?.name ?? "Region";
+        // Hover tooltip
+        (polygon as any).bindTooltip(name, { sticky: true, opacity: 0.9 });
+        polygon.on("mouseover", () => {
+          (polygon as any).openTooltip();
+        });
         polygon.on("click", () => {
           polygon.setStyle({ weight: 2, color: "#f59e0b" });
           polygon.bindPopup(
@@ -89,6 +95,7 @@ export default function RoastsMap({ onAddToCart }: RoastsMapProps) {
         });
         polygon.on("popupclose", () => {
           polygon.setStyle({ weight: 1, color: "#0f172a" });
+          (polygon as any).closeTooltip();
         });
       },
     });
@@ -114,7 +121,7 @@ export default function RoastsMap({ onAddToCart }: RoastsMapProps) {
   }, [sampleRegions, onAddToCart]);
 
   return (
-    <div className="w-full h-[28rem] rounded-lg overflow-hidden border border-neutral-200">
+    <div className={`w-full ${full ? "h-full" : "h-[28rem]"} ${full ? "" : "rounded-lg border border-neutral-200"} overflow-hidden`}>
       <div ref={mapRef} style={{ height: "100%", width: "100%" }} />
     </div>
   );

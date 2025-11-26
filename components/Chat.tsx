@@ -17,7 +17,12 @@ interface ChatResponse {
   suggestions?: string[];
 }
 
-export function Chat() {
+interface ChatProps {
+  onOpenMap?: () => void;
+  compact?: boolean;
+}
+
+export function Chat({ onOpenMap, compact }: ChatProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
@@ -35,36 +40,15 @@ export function Chat() {
     "Contact us",
   ]);
 
-  const [showRoastsModal, setShowRoastsModal] = useState(false);
-  const RoastsMap = dynamic(() => import("./RoastsMap"), { ssr: false });
-
-  const handleAddToCart = (regionName: string) => {
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: crypto.randomUUID(),
-        role: "bot",
-        text: `Added ${regionName} to cart (placeholder).`,
-      },
-    ]);
-  };
+  // Map is handled by parent as a page background
 
   const handleSuggestionClick = (s: string) => {
     if (s === "See our roasts") {
-      setShowRoastsModal(true);
+      onOpenMap?.();
       return;
     }
     sendMessage(s);
   };
-
-  useEffect(() => {
-    if (!showRoastsModal) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setShowRoastsModal(false);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [showRoastsModal]);
 
   const callChatApi = async (text: string) => {
     setIsSending(true);
@@ -131,7 +115,7 @@ export function Chat() {
   };
 
   return (
-    <div className="relative h-[720px] flex flex-col border border-neutral-200 rounded-lg bg-neutral-50">
+    <div className={`relative ${compact ? 'h-[380px]' : 'h-[520px]'} flex flex-col border border-neutral-200 rounded-lg bg-neutral-50`}>
       <div className="flex-1 overflow-y-auto p-5 space-y-2">
         {messages.map(m => <MessageBubble key={m.id} role={m.role} text={m.text} />)}
       </div>
@@ -167,36 +151,6 @@ export function Chat() {
           )}
         </div>
       </form>
-      {showRoastsModal && (
-        <div className="absolute inset-0 z-20 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setShowRoastsModal(false)} />
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="roasts-title"
-            className="relative z-30 w-full max-w-3xl mx-4 rounded-xl bg-white shadow-xl border border-neutral-200"
-          >
-            <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-200">
-              <h2 id="roasts-title" className="text-lg font-semibold text-neutral-900">Our Roasts</h2>
-              <button
-                className="p-1.5 rounded-md hover:bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-amber-300"
-                aria-label="Close"
-                onClick={() => setShowRoastsModal(false)}
-              >✕</button>
-            </div>
-            <div className="p-5">
-              <RoastsMap onAddToCart={handleAddToCart} />
-              <p className="mt-3 text-xs text-neutral-600">Hover a region to see details; click “Add to cart” inside the popup.</p>
-            </div>
-            <div className="px-5 py-4 border-t border-neutral-200 flex justify-end">
-              <button
-                className="px-4 py-2 rounded-md bg-black text-white text-sm font-medium hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-amber-300"
-                onClick={() => setShowRoastsModal(false)}
-              >Close</button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
