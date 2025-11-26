@@ -8,10 +8,13 @@ import { useState } from "react";
 import dynamic from "next/dynamic";
 import { useCart } from "@/components/cart/CartContext";
 import { CartDrawer } from "@/components/cart/CartDrawer";
+import { LocationBadge } from "@/components/LocationBadge";
+import { LocationModal } from "@/components/cart/LocationModal";
 
 export default function HomePage() {
   const { addItem, count } = useCart();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [locationModalOpen, setLocationModalOpen] = useState(false);
   const heroText = `👋 Welcome to **Vital Coffee Roasters** — where strength meets coffee.\n\nWe roast specialty coffees crafted for **energy, focus, and recovery.**\nPerfect for athletes, creators, and anyone who fuels their day naturally. 💪☕`;
 
   const renderHero = (raw: string) => {
@@ -24,10 +27,20 @@ export default function HomePage() {
   const [toast, setToast] = useState<string | null>(null);
   const RoastsMap = dynamic(() => import("@/components/RoastsMap"), { ssr: false });
 
-  const handleAddToCart = (name: string) => {
-    // Add to cart and show toast
-    addItem(name);
-    setToast(`Added ${name} to cart`);
+  const handleAddToCart = (payload: string) => {
+    // Payload format from RoastsMap: "productId:sku:qty"
+    const [pid, sku, qtyStr] = (payload || "").split(":");
+    const qty = Math.max(1, parseInt(qtyStr || "1", 10));
+    const idKey = sku ? `${pid}:${sku}` : pid;
+    const displayName = sku ? `${pid} (${sku})` : pid;
+    // Add requested quantity
+    addItem(displayName, idKey);
+    for (let i = 1; i < qty; i++) {
+      // increment remaining quantity
+      // CartContext doesn't expose inc by id here; mimic by addItem again with same id
+      addItem(displayName, idKey);
+    }
+    setToast(`Added ${displayName} ×${qty} to cart`);
     window.setTimeout(() => setToast(null), 2000);
   };
 
@@ -41,6 +54,10 @@ export default function HomePage() {
       </div>
       {/* Blank top area with only login button */}
       <div className={`absolute right-6 top-6 z-20 flex items-center gap-3`}> 
+        <div className="flex items-center gap-2">
+          <LocationBadge onClick={() => setLocationModalOpen(true)} />
+          <span className="text-[11px] text-neutral-600 hidden sm:inline">Click to change location</span>
+        </div>
         <button
           className="relative px-3 py-2 rounded-md border border-neutral-200 bg-white text-sm hover:bg-amber-50"
           onClick={() => setDrawerOpen(true)}
@@ -107,6 +124,11 @@ export default function HomePage() {
       )}
 
       <CartDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
+      <LocationModal
+        open={locationModalOpen}
+        onClose={() => setLocationModalOpen(false)}
+        onSaved={() => setLocationModalOpen(false)}
+      />
     </div>
   );
 }

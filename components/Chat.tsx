@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { MessageBubble } from "./MessageBubble";
 
@@ -23,6 +23,7 @@ interface ChatProps {
 }
 
 export function Chat({ onOpenMap, compact }: ChatProps) {
+  const endRef = useRef<HTMLDivElement | null>(null);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
@@ -107,6 +108,15 @@ export function Chat({ onOpenMap, compact }: ChatProps) {
     await callChatApi(trimmed);
   };
 
+  // Always scroll to the latest message when the list updates
+  useEffect(() => {
+    // Use a microtask to ensure DOM has rendered before scrolling
+    const id = window.requestAnimationFrame(() => {
+      endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    });
+    return () => window.cancelAnimationFrame(id);
+  }, [messages.length]);
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -115,13 +125,14 @@ export function Chat({ onOpenMap, compact }: ChatProps) {
   };
 
   // Use same height whether compact or not to keep consistent sizing
-  // Reduce height on small screens; keep current on sm+ screens
-  const panelHeight = 'h-[280px] sm:h-[380px]';
+  // Make chat more compact across all screens
+  const panelHeight = 'h-[200px] sm:h-[300px]';
 
   return (
     <div className={`relative ${panelHeight} flex flex-col border border-neutral-200 rounded-lg bg-neutral-50`}>
       <div className="flex-1 overflow-y-auto p-5 space-y-2">
         {messages.map(m => <MessageBubble key={m.id} role={m.role} text={m.text} />)}
+        <div ref={endRef} />
       </div>
       {suggestions.length > 0 && (
         <div className="px-4 py-3 bg-neutral-100 flex flex-wrap gap-2">

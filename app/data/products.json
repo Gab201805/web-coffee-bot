@@ -1,0 +1,42 @@
+{
+  "products": [
+    {
+      "id": "ethiopia-yirgacheffe-washed",
+      "slug": "ethiopia-yirgacheffe-washed",
+      "name": "Ethiopia Yirgacheffe (Washed)",
+      "origin": "Ethiopia",
+      "roast_level": "Light",
+      "notes": ["Floral", "Citrus", "Tea-like"],
+      "images": [
+        "/images/ethiopia/yirgacheffe-1.jpg"
+      ],
+      "map_zone_key": "Yirgacheffe",
+      "subscription_available": true,
+      "variants": [
+        { "size": "250g", "price": 12.0, "sku": "ETH-YIR-W-250" },
+        { "size": "500g", "price": 22.0, "sku": "ETH-YIR-W-500" },
+        { "size": "1kg",  "price": 40.0, "sku": "ETH-YIR-W-1KG" }
+      ],
+      "roast_date_policy": "Roasted twice weekly; ship within 48h"
+    },
+    {
+      "id": "ethiopia-sidamo-natural",
+      "slug": "ethiopia-sidamo-natural",
+      "name": "Ethiopia Sidamo (Natural)",
+      "origin": "Ethiopia",
+      "roast_level": "Light-Medium",
+      "notes": ["Berry", "Sweet", "Juicy"],
+      "images": [
+        "/images/ethiopia/sidamo-1.jpg"
+      ],
+      "map_zone_key": "Sidamo",
+      "subscription_available": true,
+      "variants": [
+        { "size": "250g", "price": 13.0, "sku": "ETH-SID-N-250" },
+        { "size": "500g", "price": 24.0, "sku": "ETH-SID-N-500" },
+        { "size": "1kg",  "price": 44.0, "sku": "ETH-SID-N-1KG" }
+      ],
+      "roast_date_policy": "Roasted twice weekly; ship within 48h"
+    }
+  ]
+}
