@@ -114,8 +114,12 @@ export function Chat({ onOpenMap, compact }: ChatProps) {
     }
   };
 
+  // Use same height whether compact or not to keep consistent sizing
+  // Reduce height on small screens; keep current on sm+ screens
+  const panelHeight = 'h-[280px] sm:h-[380px]';
+
   return (
-    <div className={`relative ${compact ? 'h-[380px]' : 'h-[520px]'} flex flex-col border border-neutral-200 rounded-lg bg-neutral-50`}>
+    <div className={`relative ${panelHeight} flex flex-col border border-neutral-200 rounded-lg bg-neutral-50`}>
       <div className="flex-1 overflow-y-auto p-5 space-y-2">
         {messages.map(m => <MessageBubble key={m.id} role={m.role} text={m.text} />)}
       </div>

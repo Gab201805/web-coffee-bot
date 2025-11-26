@@ -6,8 +6,12 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 import dynamic from "next/dynamic";
+import { useCart } from "@/components/cart/CartContext";
+import { CartDrawer } from "@/components/cart/CartDrawer";
 
 export default function HomePage() {
+  const { addItem, count } = useCart();
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const heroText = `👋 Welcome to **Vital Coffee Roasters** — where strength meets coffee.\n\nWe roast specialty coffees crafted for **energy, focus, and recovery.**\nPerfect for athletes, creators, and anyone who fuels their day naturally. 💪☕`;
 
   const renderHero = (raw: string) => {
@@ -21,22 +25,34 @@ export default function HomePage() {
   const RoastsMap = dynamic(() => import("@/components/RoastsMap"), { ssr: false });
 
   const handleAddToCart = (name: string) => {
+    // Add to cart and show toast
+    addItem(name);
     setToast(`Added ${name} to cart`);
     window.setTimeout(() => setToast(null), 2000);
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-white relative">
-      {/* Background map layer across the entire page */}
-      {showMap && (
-        <div className="absolute inset-0 z-0">
-          <RoastsMap full onAddToCart={handleAddToCart} />
-          {/* Optional subtle overlay to keep content readable */}
-          <div className="absolute inset-0 bg-white/10 pointer-events-none" />
-        </div>
-      )}
+      {/* Background map layer across the entire page; keep mounted to avoid flicker */}
+      <div className={`absolute inset-0 z-0 transition-opacity duration-200 ${showMap ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+        <RoastsMap full onAddToCart={handleAddToCart} />
+        {/* Optional subtle overlay to keep content readable */}
+        <div className="absolute inset-0 bg-white/10 pointer-events-none" />
+      </div>
       {/* Blank top area with only login button */}
-      <div className={`absolute right-6 top-6 z-10 ${showMap ? 'pointer-events-none' : ''}`}>
+      <div className={`absolute right-6 top-6 z-20 flex items-center gap-3`}> 
+        <button
+          className="relative px-3 py-2 rounded-md border border-neutral-200 bg-white text-sm hover:bg-amber-50"
+          onClick={() => setDrawerOpen(true)}
+          aria-label="Open cart"
+        >
+          🛒
+          {count > 0 && (
+            <span className="absolute -top-1 -right-1 rounded-full bg-amber-500 text-white text-[10px] leading-none px-1.5 py-1 shadow">
+              {count}
+            </span>
+          )}
+        </button>
         <Link href="/login" className="px-4 py-2 rounded-md bg-black text-white text-sm font-medium hover:bg-neutral-800 transition">
           Log In
         </Link>
@@ -89,6 +105,8 @@ export default function HomePage() {
           <div className="px-4 py-2 rounded-md bg-black text-white text-sm shadow">{toast}</div>
         </div>
       )}
+
+      <CartDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
     </div>
   );
 }
